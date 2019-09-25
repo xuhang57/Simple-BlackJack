@@ -1,7 +1,7 @@
+import java.util.ArrayList;
+
 public class Dealer extends PlayerClass {
-    public Dealer(String name, String cards[], int money){
-        this.name = name;
-        this.cards = cards;
-        this.money = money;
+    public Dealer(String name, int money){
+        super(name, money);
     }
 }

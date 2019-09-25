@@ -7,12 +7,20 @@ public class Card {
 
     public Card(String suit, int value){
         this.suit = suit;
-        this.value = value + 1;
+        this.value = value > 9 ? 10 : value + 1;
         this.number = values[value];
     }
 
     public int getValue(){
         return value;
+    }
+
+    public String getNumber(){
+        return number;
+    }
+
+    public String getSuit(){
+        return suit;
     }
 
     public String toString(){
