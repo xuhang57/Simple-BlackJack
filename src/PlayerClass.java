@@ -1,97 +1,92 @@
-import java.awt.image.AreaAveragingScaleFilter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.ArrayList;
 
 public class PlayerClass {
-    protected String name;
-    protected List<Card> hand;
-    protected List<List<Card>> hands;
-    protected int balance;
+    private String name;
+    // hand is a list of cards that a player can have
+    private List<Card> hand;
+    // hands contains all hand that a player might have
+    private List<List<Card>> hands;
+    private int balance;
 
-    public PlayerClass(String name, int balance){
+    public PlayerClass(String name, int balance) {
         this.name = name;
         this.balance = balance;
         this.hand = new ArrayList<>();
         this.hands = new ArrayList<>();
     }
 
-    // draw a new card
-    public void hit(Card card){
-        this.hand.add(card);
-    }
-
-    public static void stand(){
-
-    }
-
-    public static void split(){
-
-    }
-
-    public static void doubleUp(){
-
-    }
-
-    public void addBalance(int balance){
+    public void addBalance(int balance) {
         this.balance += balance;
     }
 
-    public void minusBalance(int balance){
+    public void minusBalance(int balance) {
         this.balance -= balance;
     }
 
-    public int getBalance(){
+    public int getBalance() {
         return this.balance;
     }
 
-    public void addCard(Card card){
+    public void addCard(Card card) {
         this.hand.add(card);
     }
 
-    public List<Card> getCards(){
-        return hand;
+    public List<Card> getCards() {
+        return this.hand;
     }
 
-    public void cleanHands(){
+    public void cleanHands() {
         this.hand = new ArrayList<>();
         this.hands = new ArrayList<>();
     }
 
-    public List<Card> getHand(){
+    public List<Card> getHand() {
         return this.hand;
     }
 
-    public void setHand(List<Card> hand){
+    public void setHand(List<Card> hand) {
         this.hand = hand;
     }
 
-    public void setHands(List<List<Card>> hands){
-        this.hands = hands;
-    }
-
-    public void setHands(){
+    public void setHands() {
         List<List<Card>> newList = new ArrayList<>();
         newList.add(hand);
         this.hands = newList;
     }
 
-    public List<List<Card>> getHands(){
+    public void setHands(List<List<Card>> hands) {
+        this.hands = hands;
+    }
+
+    public List<List<Card>> getHands() {
         return this.hands;
     }
 
-    public int calculateValue(int index){
+    /*
+    Compute the total value of a Hand
+
+    param: index : int, used to locate the hand in all hands that the Player might have
+    return: int, total value of a hand
+     */
+    public int calculateValue(int index) {
         int value = 0;
+        // count how many "Ace" in the hand that we have used as a value of 11
         int count = 0;
         List<Card> hand = this.hands.get(index);
-        for(int i = 0; i < hand.size(); i++){
+        for (int i = 0; i < hand.size(); i++) {
             Card card = hand.get(i);
             value += card.getValue();
-            if(card.getNumber() == "A"){
+            // Special case: since "Ace" could have value 11 or 1
+            // Here we treat "Ace" as 11 if the total value is less than 21
+            // Therefore, we add another 10 (the 1 has been added above) and increase the count counter
+            if (card.getNumber().equals("A")) {
                 value += 10;
                 count += 1;
             }
-            while(value > 21 && count > 0){
+            // When the total value is larger than 21 and we have used "Ace" as 11 not 1, we need to treat it as 1
+            // Therefore, subtract 10 from the total value and decrease the count counter
+            while (value > 21 && count > 0) {
                 value -= 10;
                 count -= 1;
             }
@@ -99,12 +94,17 @@ public class PlayerClass {
         return value;
     }
 
-    public String handsToString(){
+    /*
+    Print All Hands that the Player might have
+
+    return: A String contains all hands that the Player might have
+     */
+    public String handsToString() {
         String str = "[";
-        for(int i = 0; i < hands.size(); i++){
+        for(int i = 0; i < hands.size(); i++) {
             String card = "[";
             List<Card> hand = hands.get(i);
-            for(int j = 0; j < hand.size(); j++){
+            for(int j = 0; j < hand.size(); j++) {
                 card += (hand.get(j).getSuit() + " " + hand.get(j).getNumber() + ", ");
             }
             card.trim();
@@ -116,10 +116,15 @@ public class PlayerClass {
         return str;
     }
 
-    public String handToString(int index){
+    /*
+    Print the Hand that the Player possesses
+
+    return: A String contains all Cards in the Hand that the Payer possesses
+     */
+    public String handToString(int index) {
         String card = "";
         List<Card> hand = this.hands.get(index);
-        for(int i = 0; i < hand.size(); i++){
+        for (int i = 0; i < hand.size(); i++) {
             card += (hand.get(i).getSuit() + " " + hand.get(i).getNumber() + ", ");
         }
         card.trim();

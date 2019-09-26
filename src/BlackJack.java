@@ -1,384 +1,346 @@
+/*
+ * Authors: Fuqing Wang (fuqing04@bu.edu), Hang Xu (xuh@bu.edu)
+ * Game: Console-based BlackJack with 2 different play modes
+ * Date: Sept. 28, 2019
+ */
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class BlackJack {
-    private static ArrayList<Card> deck = new ArrayList<>();
-    private static Player player;
-    private static Dealer dealer;
 
-    private static String suits[] = {"Spade", "Diamond", "Heart", "Clubs"};
+    private static void singlePlayerMode(CardDeck deck) {
+        System.out.println("Single Player Mode");
 
-    public static void shuffle() {
-        // shuffle cards
-        for(int i = 0; i < suits.length; i++){
-            for(int j = 0; j < 13; j++){
-                deck.add(new Card(suits[i], j));
-            }
-        }
-    }
+        HumanPlayer human = new HumanPlayer("Human Player", 100);
+        Dealer dealer = new Dealer("Dealer", Integer.MAX_VALUE);
 
+        // dealer draws a faced up card so show in the console
+        boolean canPlay = true;
 
-    // this method draws a card from the deck
-    public static Card drawCard(){
-        int random = (int) Math.floor(Math.random() * deck.size());
-        // gets the card
-        Card card = deck.get(random);
-        // remove card from the deck
-        deck.remove(random);
-        // return card
-        return card;
-    }
-
-    public String toString() {
-        String str = "[";
-        for(int i = 0; i < deck.size(); i++){
-            str += deck.get(i) + ", ";
-        }
-        str.trim();
-        str += "]";
-        return str;
-    }
-
-    public static List<List<Card>> split(List<Card> hand){
-        if(hand.get(0).getNumber() == hand.get(1).getNumber()){  // if split-able, ask user if split
-            System.out.println("Your card is: " + player.handsToString());
+        while(human.getBalance() >= 0 && canPlay) {
+            System.out.println("Your current balance is: " + human.getBalance() +
+                    ". Please choose a bet amount per game: [5]");
             Scanner scan = new Scanner(System.in);
-            System.out.println("Do you want to split? 1.Yes 2.No ");
-            int mode = scan.nextInt();
-            if(mode == 1){ // if the user choose to split
-                List<Card> hand1 = new ArrayList<>();
-                List<Card> hand2 = new ArrayList<>();
-                hand1.add(hand.get(0));
-                hand1.add(drawCard());
-                hand2.add(hand.get(1));
-                hand2.add(drawCard());
-
-                List<List<Card>> newList = new ArrayList<>();
-                newList.addAll(split(hand1));
-                newList.addAll(split(hand2));
-                return newList;
-            }else{ // if the user choose not to split
-                List<List<Card>> newList = new ArrayList<>();
-                newList.add(hand);
-                return newList;
+            int betPerGame = scan.nextInt();
+            while (human.getBalance() - betPerGame < 0) {
+                System.out.println("You don't have enough balance for this bet. Choose a different amount.");
+                betPerGame = scan.nextInt();
             }
-        }else{
-            List<List<Card>> newList = new ArrayList<>();
-            newList.add(hand);
-            return newList;
-        }
-    }
+            // Put the bet for this game
+            human.subtractBalance(betPerGame);
+            // draw two cards first for each player
+            dealer.addCard(deck.drawCard());
+            human.addCard(deck.drawCard());
+            dealer.addCard(deck.drawCard());
+            human.addCard(deck.drawCard());
+            // initialize hands of different players
+            human.initHands();
+            dealer.initHands();
 
-    public static Player split_new(Player player, List<Card> hand, int amt){
-        if(hand.get(0).getNumber() == hand.get(1).getNumber() && player.getBalance() - amt >= 0){  // if split-able, ask user if split
-            System.out.println("Your card is: " + handToString(hand));
-            Scanner scan = new Scanner(System.in);
-            System.out.println("Do you want to split? 1.Yes 2.No ");
-            int mode = scan.nextInt();
-            if(mode == 1){ // if the user choose to split
-                List<List<Card>> newList = new ArrayList<>();
-                player.minusBalance(amt);
+            System.out.println("Now, Human Player's turn: ");
+            System.out.println("Dealer shows: " + dealer.getHand().get(0));
+            System.out.println("Your card is " + human.printHands());
 
-                List<Card> hand1 = new ArrayList<>();
-                hand1.add(hand.get(0));
-                Card card1 = drawCard();
-                hand1.add(card1);
-                player.setHand(hand1);
-                System.out.println("You drew a new card: " + card1.toString());
-                newList.add(split_new(player, hand1, amt).getHand());
-
-                List<Card> hand2 = new ArrayList<>();
-                hand2.add(hand.get(1));
-                Card card2 = drawCard();
-                hand2.add(card2);
-                player.setHand(hand2);
-                System.out.println("You drew a new card: " + card2.toString());
-                hand2.add(drawCard());
-                newList.add(split_new(player, hand2, amt).getHand());
-
-                player.setHands(newList);
-                return player;
-            }else{ // if the user choose not to split
-                List<List<Card>> newList = new ArrayList<>();
-                newList.add(hand);
-                player.setHand(hand);
-                player.setHands(newList);
-                return player;
+            // player's turn
+            // if the Human Player has enough money, the player might be able to split the hand
+            if (human.getBalance() - betPerGame >= 0) {
+                human.setHands(split(human, human.getHand(), betPerGame, deck).getHands());
+                // not enough money
+            } else {
+                human.initHands();
             }
-        }else{
-            List<List<Card>> newList = new ArrayList<>();
-            newList.add(hand);
-            player.setHand(hand);
-            player.setHands(newList);
-            return player;
-        }
-    }
 
-    public static String handToString(List<Card> hand){
-        String card = "";
-        for(int i = 0; i < hand.size(); i++){
-            card += (hand.get(i).getSuit() + " " + hand.get(i).getNumber() + ", ");
-        }
-        card.trim();
-        card = card.substring(0, card.length()-2);
-        return card;
-    }
+            for (int index = 0; index < human.getHands().size(); index++) {
+                int curBet = betPerGame;
+                while (human.calculateValue(index) < 22) {
+                    List<Card> hand = human.getHands().get(index);
+                    // set the hand to the current hand of the player's
+                    human.setHand(hand);
 
-    public static void main(String[] args) {
-        System.out.println("Welcome to Fuqing and Hang's BlackJack table!");
-        shuffle();
-        dealer = new Dealer("Player2", Integer.MAX_VALUE);
-        player = new Player("Player1", 100);
-
-        // choose play mode
-        Scanner scan = new Scanner(System.in);
-        System.out.println("Choose a play mode.(enter 1 for single player and 2 for versus mode)");
-        int mode = scan.nextInt();
-        if(mode == 1){
-            // dealer draws a faced up card
-            boolean play = true;
-
-            while(player.getBalance() >= 0 && play) {
-                // game start
-                System.out.println("Your current balance is: " + player.getBalance() + ". Choose a bet amount:");
-                int amt = scan.nextInt();
-                while(player.getBalance() - amt < 0){
-                    System.out.println("You don't have enough balance for this bet. Choose a different amount.");
-                    amt = scan.nextInt();
-                }
-                player.minusBalance(amt);
-                // player and dealer each draws two cards
-                dealer.addCard(drawCard());
-                dealer.addCard(drawCard());
-                player.addCard(drawCard());
-                player.addCard(drawCard());
-                dealer.setHands();
-                player.setHands();
-
-                System.out.println("Player's turn: ");
-                System.out.println("Dealer shows: " + dealer.getCards().get(0));
-                System.out.println("Your card is " + player.handsToString());
-                // player's turn
-                if(player.getBalance() - amt >= 0){
-                    player.setHands(split_new(player, player.getHand(), amt).getHands());
-                }else{
-                    player.setHands();
-                }
-
-                for (int i = 0; i < player.getHands().size(); i++) {
-                    int tmp_amt = amt;
-                    while (player.calculateValue(i) < 22) {
-                        List<Card> hand = player.getHands().get(i);
-                        player.setHand(hand);
-
-                        System.out.println("Your have: " + player.handToString(i) + ", total points " + player.calculateValue(i) + ".");
-                        System.out.println("Do you want to 1.hit 2.stand 3.double up");
-                        int choice = scan.nextInt();
-                        if (choice == 1) { // hit
-                            Card newCard = drawCard();
-                            player.addCard(newCard);
+                    System.out.println("Your have: " + human.printHand(index) + ", total points " +
+                            human.calculateValue(index) + ".");
+                    System.out.println("Do you want to 1(hit), 2 (stand), 3 (double up): e.g. 1");
+                    int choice = scan.nextInt();
+                    if (choice == 1) {
+                        Card newCard = deck.drawCard();
+                        // Add the new card to the current hand
+                        human.addCard(newCard);
+                        System.out.println("The new card is: " + newCard.toString() + ".");
+                    } else if (choice == 2) {
+                        break;
+                    } else if (choice == 3) {
+                        if (human.getBalance() - curBet >= 0) {
+                            human.subtractBalance(curBet);
+                            curBet = betPerGame * 2;
+                            Card newCard = deck.drawCard();
+                            human.addCard(newCard);
                             System.out.println("The new card is: " + newCard.toString() + ".");
-                        } else if (choice == 2) { // stand
+                            System.out.println("Your cards are now: " + human.printHand(index) + ", total points " +
+                                    human.calculateValue(index) + ".");
                             break;
-                        } else if (choice == 3) { // double up
-                            if(player.getBalance() - tmp_amt >= 0){
-                                player.minusBalance(tmp_amt);
-                                tmp_amt = amt*2;
-                                Card newCard = drawCard();
-                                player.addCard(newCard);
-                                System.out.println("The new card is: " + newCard.toString() + ".");
-                                System.out.println("Your cards are now: " + player.handToString(i) + ", total points " + player.calculateValue(i) + ".");
-                                break;
-                            } else {
-                                System.out.println("You don't have enough money to double up!");
-                            }
                         } else {
-                            break;
+                            System.out.println("You don't have enough money, please try other options");
                         }
-                    }
-
-                    // dealer's turn
-                    dealer.setHands();
-                    System.out.println("-----------------------------------------------------------------------------");
-                    System.out.println("Dealer's turn: ");
-                    System.out.println("Dealer's cards are: " + dealer.handToString(0) + ", total points " + dealer.calculateValue(0) + ".");
-                    while (dealer.calculateValue(0) <= player.calculateValue(i) && player.calculateValue(i) <= 21) {
-                        Card newCard = drawCard();
-                        dealer.addCard(newCard);
-                        System.out.println(" ...... Dealer chooses to hit  ......");
-                        System.out.println("Dealer draws a new card " + newCard.toString());
-                        System.out.println("Dealer's cards are: " + dealer.handToString(0) + ", total points " + dealer.calculateValue(0) + ".");
-                    }
-
-                    System.out.println(" ...... Dealer chooses to stand  ......");
-                    System.out.println("Player's cards are: " + player.handToString(i) + ", total points " + player.calculateValue(i) + ".");
-                    System.out.println("Dealer's cards are: " + dealer.handToString(0) + ", total points " + dealer.calculateValue(0) + ".");
-
-                    // check win
-                    int p = player.calculateValue(i);
-                    int d = dealer.calculateValue(0);
-
-                    if (p <= 21 && d <= 21) {
-                        if (p < d) {
-                            System.out.println("Dealer wins!");
-                        } else if (p > d) {
-                            player.addBalance(tmp_amt*2);
-                            System.out.println("Player wins");
-                        } else {
-                            System.out.println("The game tied");
-                        }
-                    } else if (p <= 21 && d > 21) {
-                        player.addBalance(tmp_amt*2);
-                        System.out.println("Player wins");
-                    } else if (p > 21 && d <= 21) {
-                        System.out.println("Dealer wins");
                     } else {
-                        System.out.println("The game tied");
+                        System.out.println("Invalid choice! Exit now.");
+                        break;
                     }
                 }
 
-                System.out.println("Your current balance is: " + player.getBalance() + ".");
-                if(player.getBalance() > 0){
-                    System.out.println("Do you want to play again? 1.Yes 2.No");
-                    int input = scan.nextInt();
-                    if(input == 1){
-                        player.cleanHands();
-                        dealer.cleanHands();
-                        shuffle();
+                // dealer's turn
+                dealer.initHands();
+                System.out.println("-----------------------------------------------------------------------------");
+                System.out.println("Dealer's turn: ");
+                System.out.println("Dealer's cards are: " + dealer.printHand(0) +
+                        ", total points " + dealer.calculateValue(0) + ".");
+                while (dealer.calculateValue(0) <= human.calculateValue(index) && human.calculateValue(index) <= 21) {
+                    Card newCard = deck.drawCard();
+                    dealer.addCard(newCard);
+                    System.out.println(" ...... Dealer chooses to hit  ......");
+                    System.out.println("Dealer draws a new card " + newCard.toString());
+                    System.out.println("Dealer's cards are: " + dealer.printHand(0) + ", total points " + dealer.calculateValue(0) + ".");
+                }
+
+                System.out.println(" ...... Dealer chooses to stand  ......");
+                System.out.println("Player's cards are: " + human.printHand(index) + ", total points "
+                        + human.calculateValue(index) + ".");
+                System.out.println("Dealer's cards are: " + dealer.printHand(0) +
+                        ", total points " + dealer.calculateValue(0) + ".");
+
+                // Find winner!
+                int humanTotal = human.calculateValue(index);
+                int dealerTotal = dealer.calculateValue(index);
+
+                if (humanTotal <= 21 && dealerTotal <= 21) {
+                    // if draw, the deal wins
+                    if (humanTotal <= dealerTotal) {
+                        System.out.println("Dealer wins!");
                     } else {
-                        play = false;
-                        System.out.println("You have cashed out.");
+                        // get back own portion and the dealer's portion
+                        human.addBalance(curBet * 2);
+                        System.out.println("Player wins");
                     }
-                }else{
-                    play = false;
+                } else if (humanTotal <= 21 && dealerTotal > 21) {
+                    human.addBalance(curBet * 2);
+                    System.out.println("Player wins");
+                } else if (humanTotal > 21 && dealerTotal <= 21) {
+                    System.out.println("Dealer wins");
+                } else {
+                    System.out.println("Dealer wins");
+                }
+            }
+
+            System.out.println("Your current balance is: " + human.getBalance() + ".");
+            if (human.getBalance() > 0) {
+                System.out.println("Do you want to play again? 1 (Yes) or  2 (No)");
+                int input = scan.nextInt();
+                if (input == 1) {
+                    human.cleanHands();
+                    dealer.cleanHands();
+                    deck.prepareDeck();
+                } else {
+                    canPlay = false;
                     System.out.println("You have lost all your money. Better luck next time!");
                 }
             }
         }
+    }
 
-        if(mode == 2){
-            // dealer draws a faced up card
-            boolean play = true;
-            while(player.getBalance() >= 0 && play) {
-                // game start
-                System.out.println("Your current balance is: " + player.getBalance() + ". Choose a bet amount:");
-                int amt = scan.nextInt();
-                while(player.getBalance() - amt < 0){
-                    System.out.println("You don't have enough balance for this bet. Choose a different amount.");
-                    amt = scan.nextInt();
-                }
-                player.minusBalance(amt);
-                // player and dealer each draws two cards
-                dealer.addCard(drawCard());
-                dealer.addCard(drawCard());
-                player.addCard(drawCard());
-                player.addCard(drawCard());
-                dealer.setHands();
-                player.setHands();
+    private static void doublePlayerMode(CardDeck deck) {
+        HumanPlayer human = new HumanPlayer("Human Player", 100);
+        Dealer dealer = new Dealer("Dealer", Integer.MAX_VALUE);
 
-                System.out.println("Dealer shows: " + dealer.getCards().get(0));
+        // dealer draws a faced up card so show in the console
+        boolean canPlay = true;
+        while (human.getBalance() >= 0 && canPlay) {
+            System.out.println("Your current balance is: " + human.getBalance() + ". Choose a bet amount:");
+            Scanner scan = new Scanner(System.in);
+            int betPerGame = scan.nextInt();
+            while(human.getBalance() - betPerGame < 0) {
+                System.out.println("You don't have enough balance for this bet. Choose a different amount.");
+                betPerGame = scan.nextInt();
+            }
 
-                System.out.println("Your card is " + player.handsToString());
-                // player's turn
-                if(player.getBalance() - amt >= 0){
-                    player.setHands(split_new(player, player.getHand(), amt).getHands());
-                }else{
-                    player.setHands();
-                }
+            human.subtractBalance(betPerGame);
+            // player and dealer each draws two cards
+            dealer.addCard(deck.drawCard());
+            human.addCard(deck.drawCard());
+            dealer.addCard(deck.drawCard());
+            human.addCard(deck.drawCard());
 
-                for (int i = 0; i < player.getHands().size(); i++) {
-                    int tmp_amt = amt;
-                    while (player.calculateValue(i) < 22) {
-                        List<Card> hand = player.getHands().get(i);
-                        player.setHand(hand);
+            dealer.initHands();
+            human.initHands();
 
-                        System.out.println("Player has: " + player.handToString(i) + ", total points " + player.calculateValue(i) + ".");
-                        System.out.println("Do you want to 1.hit 2.stand 3.double up");
-                        int choice = scan.nextInt();
-                        if (choice == 1) { // hit
-                            Card newCard = drawCard();
-                            player.addCard(newCard);
+            System.out.println("Dealer shows: " + dealer.getHand().get(0));
+            System.out.println("Your card is " + human.printHand());
+
+            // player's turn
+            if(human.getBalance() - betPerGame >= 0) {
+                human.setHands(split(human, human.getHand(), betPerGame, deck).getHands());
+            } else {
+                human.initHands();
+            }
+
+            for(int i = 0; i < human.getHands().size(); i++) {
+                int curBet = betPerGame;
+                while (human.calculateValue(i) < 22) {
+                    List<Card> hand = human.getHands().get(i);
+                    human.setHand(hand);
+
+                    System.out.println("Player has: " + human.printHand(i) + ", total points " + human.calculateValue(i) + ".");
+                    System.out.println("Do you want to 1(hit), 2 (stand), 3 (double up): e.g. 1");
+                    int choice = scan.nextInt();
+                    if (choice == 1) { // hit
+                        Card newCard = deck.drawCard();
+                        human.addCard(newCard);
+                        System.out.println("The new card is: " + newCard.toString() + ".");
+                    } else if (choice == 2) { // stand
+                        break;
+                    } else if (choice == 3) { // double up
+                        // if there is enough money
+                        if (human.getBalance() - curBet >= 0) {
+                            human.subtractBalance(curBet);
+                            curBet = betPerGame * 2;
+                            Card newCard = deck.drawCard();
+                            human.addCard(newCard);
                             System.out.println("The new card is: " + newCard.toString() + ".");
-                        } else if (choice == 2) { // stand
+                            System.out.println("Player's'cards are now: " + human.printHand(i) +
+                                    ", total points " + human.calculateValue(i) + ".");
                             break;
-                        } else if (choice == 3) { // double up
-                            if(player.getBalance() - tmp_amt >= 0){
-                                player.minusBalance(tmp_amt);
-                                tmp_amt = amt*2;
-                                Card newCard = drawCard();
-                                player.addCard(newCard);
-                                System.out.println("The new card is: " + newCard.toString() + ".");
-                                System.out.println("Player's'cards are now: " + player.handToString(i) + ", total points " + player.calculateValue(i) + ".");
-                                break;
-                            } else {
-                                System.out.println("You don't have enough money to double up!");
-                            }
                         } else {
-                            break;
+                            System.out.println("You don't have enough money to double up!");
                         }
+                    } else {
+                        break;
                     }
+                }
 
-                    // dealer's turn
-                    System.out.println("Dealer's turn: ");
-                    dealer.setHands();
-                    while (dealer.calculateValue(i) < 22) {
-                        List<Card> hand = dealer.getHands().get(i);
-                        dealer.setHand(hand);
+                // dealer's turn
+                System.out.println("Dealer's turn: ");
+                dealer.initHands();
 
-                        System.out.println("Dealer has: " + dealer.handToString(i) + ", total points " + dealer.calculateValue(i) + ".");
-                        System.out.println("Do you want to 1.hit 2.stand");
-                        int choice = scan.nextInt();
-                        if (choice == 1) { // hit
-                            Card newCard = drawCard();
-                            dealer.addCard(newCard);
-                            System.out.println("The new card is: " + newCard.toString() + ".");
-                        } else { // stand
-                            System.out.println("Dealer has: " + dealer.handToString(i) + ", total points " + dealer.calculateValue(i) + ".");
-                            break;
-                        }
+                while (dealer.calculateValue(i) < 22) {
+                    List<Card> hand = dealer.getHands().get(i);
+                    dealer.setHand(hand);
+
+                    System.out.println("Dealer has: " + dealer.printHand(i) + ", total points " + dealer.calculateValue(i) + ".");
+                    System.out.println("Do you want to 1 (hit) or  2 (stand)");
+                    int choice = scan.nextInt();
+                    if (choice == 1) { // hit
+                        Card newCard = deck.drawCard();
+                        dealer.addCard(newCard);
+                        System.out.println("The new card is: " + newCard.toString() + ".");
+                    } else { // stand
+                        System.out.println("Dealer has: " + dealer.printHand(i) +
+                                ", total points " + dealer.calculateValue(i) + ".");
+                        break;
                     }
+                }
 
-                    // check win
-                    int p = player.calculateValue(i);
-                    int d = dealer.calculateValue(0);
+                // check win
+                int humanTotal = human.calculateValue(i);
+                int dealerTotal = dealer.calculateValue(0);
 
-                    if (p <= 21 && d <= 21) {
-                        if (p < d) {
-                            System.out.println("Dealer wins!");
-                        } else if (p > d) {
-                            player.addBalance(tmp_amt*2);
-                            System.out.println("Player wins");
-                        } else {
-                            System.out.println("The game tied");
-                        }
-                    } else if (p <= 21 && d > 21) {
-                        player.addBalance(tmp_amt*2);
+                if (humanTotal <= 21 && dealerTotal <= 21) {
+                    if (humanTotal <= dealerTotal) {
+                        System.out.println("Dealer wins!");
+                    } else {
+                        human.addBalance(betPerGame*2);
                         System.out.println("Player wins");
-                    } else if (p > 21 && d <= 21) {
-                        System.out.println("Dealer wins");
-                    } else {
-                        System.out.println("The game tied");
                     }
-                }
-
-                System.out.println("Player's balance is: " + player.getBalance() + ".");
-                if(player.getBalance() > 0){
-                    System.out.println("Do you want to play again? 1.Yes 2.No");
-                    int input = scan.nextInt();
-                    if(input == 1){
-                        player.cleanHands();
-                        dealer.cleanHands();
-                        shuffle();
-                    } else {
-                        play = false;
-                        System.out.println("Player has cashed out.");
-                    }
-                }else{
-                    play = false;
-                    System.out.println("Player has lost all money. Game exits!");
+                } else if (humanTotal <= 21 && dealerTotal > 21) {
+                    human.addBalance(betPerGame*2);
+                    System.out.println("Player wins");
+                } else if (humanTotal > 21 && dealerTotal <= 21) {
+                    System.out.println("Dealer wins");
+                } else {
+                    System.out.println("Dealer wins");
                 }
             }
+
+            System.out.println("Player's balance is: " + human.getBalance() + ".");
+            if(human.getBalance() > 0){
+                System.out.println("Do you want to play again? 1 (Yes) or 2 (No)");
+                int input = scan.nextInt();
+                if(input == 1){
+                    human.cleanHands();
+                    dealer.cleanHands();
+                    deck.prepareDeck();
+                } else {
+                    canPlay = false;
+                    System.out.println("Player has cashed out.");
+                }
+            }else{
+                canPlay = false;
+                System.out.println("Player has lost all money. Game exits!");
+            }
+        }
+    }
+
+    private static HumanPlayer split(HumanPlayer human, List<Card> hand, int betPerGame, CardDeck deck) {
+        Card firstCard = hand.get(0);
+        Card secondCard = hand.get(1);
+        boolean isSameCard = firstCard.getNumber() == secondCard.getNumber();
+        if (isSameCard && human.getBalance() - betPerGame >= 0) {
+            System.out.println("Your card is: " + human.printHand());
+            Scanner scan = new Scanner(System.in);
+            System.out.println("Do you want to split? type 1 for Yes or 2 for No ");
+            int isSplit = scan.nextInt();
+            if (isSplit == 1) {
+                List<List<Card>> newHands = new ArrayList<>();
+                // bet the same amount of money to the new hand
+                human.subtractBalance(betPerGame);
+                List<Card> firstHand = new ArrayList<>();
+                firstHand.add(firstCard);
+                Card newCard = deck.drawCard();
+                firstHand.add(newCard);
+                human.setHand(firstHand);
+                System.out.println("You drew a new card: " + newCard.toString());
+                newHands.add(split(human, firstHand, betPerGame, deck).getHand());
+
+                List<Card> secondHand = new ArrayList<>();
+                secondHand.add(secondCard);
+                newCard = deck.drawCard();
+                secondHand.add(newCard);
+                human.setHand(secondHand);
+                System.out.println("You drew a new card: " + newCard.toString());
+                secondHand.add(deck.drawCard());
+                newHands.add(split(human, firstHand, betPerGame, deck).getHand());
+
+                human.setHands(newHands);
+                return human;
+            }
+        }
+
+        List<List<Card>> newHands = new ArrayList<>();
+        newHands.add(hand);
+        human.setHand(hand);
+        human.setHands(newHands);
+        return human;
+    }
+
+    public static void main(String[] args) {
+        System.out.println("Welcome to Fuqing and Hang's BlackJack table!");
+
+        // Prepare a Deck for Players to use
+        CardDeck deck = new CardDeck();
+        deck.prepareDeck();
+
+        // choose play mode based on the user input
+        Scanner scan = new Scanner(System.in);
+        System.out.println("Please choose a play mode: 1 for single player 2 for 2 players mode [1]");
+        int mode = scan.nextInt();
+        while (mode != 1 && mode != 2) {
+            System.out.println("Please enter either 1 or 2");
+            mode = scan.nextInt();
+        }
+
+        if (mode == 1) {
+            singlePlayerMode(deck);
+        } else {
+            doublePlayerMode(deck);
         }
     }
 }

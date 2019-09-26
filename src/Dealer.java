@@ -1,7 +1,12 @@
-import java.util.ArrayList;
+public class Dealer extends Player {
 
-public class Dealer extends PlayerClass {
-    public Dealer(String name, int money){
-        super(name, money);
+    public Dealer(String name, int balance) {
+        super(name, balance, true);
     }
+
+    public Dealer(String name, int balance, boolean isDealer) {
+        super(name, balance, isDealer);
+    }
+
+
 }

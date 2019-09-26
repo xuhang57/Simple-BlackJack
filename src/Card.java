@@ -1,30 +1,29 @@
 public class Card {
-    private String suit;
-    private int value;
-    private String number;
+    private Suit suit;
+    private int rank;
+    private String face;
+    // uses the index as its rank value
+    private static String ranks[] = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
 
-    private static String values[] = {"A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"};
-
-    public Card(String suit, int value){
+    public Card(Suit suit, int value) {
         this.suit = suit;
-        this.value = value > 9 ? 10 : value + 1;
-        this.number = values[value];
+        this.rank = value > 9 ? 10 : value + 1;
+        this.face = ranks[value];
     }
 
-    public int getValue(){
-        return value;
+    public int getValue() {
+        return this.rank;
     }
 
-    public String getNumber(){
-        return number;
+    public String getNumber() {
+        return face;
     }
 
-    public String getSuit(){
-        return suit;
+    public Suit getSuit() {
+        return this.suit;
     }
 
-    public String toString(){
-        return suit + " " + number;
+    public String toString() {
+        return this.suit.toString() + " " + face;
     }
 }
-
