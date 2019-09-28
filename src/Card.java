@@ -11,11 +11,11 @@ public class Card {
         this.face = ranks[value];
     }
 
-    public int getValue() {
+    public int getRank() {
         return this.rank;
     }
 
-    public String getNumber() {
+    public String getFace() {
         return face;
     }
 

@@ -11,16 +11,12 @@ public class BlackJack {
     public static void main(String[] args) {
         System.out.println("Welcome to Fuqing and Hang's BlackJack table!");
 
-        // Prepare a Deck for Players to use
-        CardDeck deck = new CardDeck();
-        deck.prepareDeck();
-
         // prepare game
         Game game = new Game();
 
         // choose play mode based on the user input
         Scanner scan = new Scanner(System.in);
-        System.out.println("Please choose a play mode: 1 for single player 2 for 2 players mode [1]");
+        System.out.println("Please choose a play mode: (1 for single player, 2 for versus mode)");
         int mode = scan.nextInt();
         while (mode != 1 && mode != 2) {
             System.out.println("Please enter either 1 or 2");
@@ -28,9 +24,11 @@ public class BlackJack {
         }
 
         if (mode == 1) {
-            game.singlePlayerMode(deck);
+            System.out.println("Single Player Mode");
+            game.PlayMode(1);
         } else {
-            game.doublePlayerMode(deck);
+            System.out.println("Double Player Mode");
+            game.PlayMode(2);
         }
     }
 }

@@ -10,6 +10,7 @@ public class CardDeck {
 
     public void prepareDeck() {
         // In a normal poker game, there are 4 suits
+        this.deck.clear();
         int suitSize = Suit.values().length;
         for (int suit = 0; suit < suitSize; suit++) {
             // ToDo: Rank should be abstracted as well so that it is easily changeable
@@ -39,4 +40,12 @@ public class CardDeck {
         return this.deck.size();
     }
 
+
+    public String toString() {
+        String str = "[";
+        for (int i = 0; i < deck.size(); i++){
+            str += (deck.get(i).toString() + ',');
+        }
+        return str.substring(0, str.length() - 1) + "]";
+    }
 }
