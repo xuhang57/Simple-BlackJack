@@ -22,45 +22,58 @@ public abstract class AbstractPlayer {
         this.isDealer = isDealer;
     }
 
+    /** return player's name */
     public String getName(){
         return this.name;
     }
 
+    /** set player's balance */
     public void setName(String name){
         this.name = name;
     }
 
+    /** return player's current hand */
     public List<Card> getHand() {
         return this.hand;
     }
 
+    /** set player's current hand
+     * for example, player has two hands [spade 4, heart 5] and [diamond 5, club 6].
+     * we call setHand([diamond 5, club 6]) when player operates on second hand of card
+     * */
     public void setHand(List<Card> hand) {
         this.hand = hand;
     }
 
+    /** return player's current hands */
     public List<List<Card>> getHands() {
         return this.hands;
     }
 
+    /** set player's current hands */
     public void setHands(List<List<Card>> hands) {
         this.hands = hands;
     }
 
+    /** return player's balance */
     public void initHands() {
         List<List<Card>> myHand = new ArrayList<>();
         myHand.add(this.hand);
         this.hands = myHand;
     }
 
+    /** clean up all cards player has */
     public void cleanHands() {
         this.hand.clear();
         this.hands.clear();
     }
 
+    /** return player's balance */
     public int getBalance() {
         return this.balance;
     }
 
+    /** set player's balance */
     public void setBalance(int balance) {
         this.balance = balance;
     }
@@ -96,6 +109,7 @@ public abstract class AbstractPlayer {
         return value;
     }
 
+    /** Print the Hand that the Player currently possesses, in the format of [spade 4, heart 5] */
     public String printHand() {
         StringBuilder sb = new StringBuilder();
         sb.append("[");
@@ -106,7 +120,7 @@ public abstract class AbstractPlayer {
         return sb.substring(0, sb.length() - 2) + "]";
     }
 
-    /** Print the Hand that the Player possesses */
+    /** Print a specific Hand amongst all Hands that the player has, in the format of [spade 4, heart 5]*/
     public String printHand(int index) {
         StringBuilder sb = new StringBuilder();
         List<Card> hand = this.hands.get(index);
@@ -117,7 +131,7 @@ public abstract class AbstractPlayer {
         return sb.substring(0, sb.length() - 2) + "]";
     }
 
-    /** Print All Hands that the Player might have */
+    /** Print All Hands that the Player might have, in the format of [[spade 4, heart 5], [spade Q, heart 2]] */
     public String printHands() {
         StringBuilder res = new StringBuilder();
         res.append("[");

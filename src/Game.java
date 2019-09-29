@@ -4,6 +4,7 @@ import java.util.Scanner;
 
 /**
  * @author Fuqing Wang, Hang Xu
+ * This is where the game logic sits
  */
 public class Game {
 
@@ -43,6 +44,7 @@ public class Game {
         dealer.initHands();
     }
 
+    /** Blackjack dummy dealer AI */
     public void blackJackDealersTurn_AI(Player player, Dealer dealer) {
         // dealer's turn
         int playerMaxPoints = 0;
@@ -65,6 +67,7 @@ public class Game {
         System.out.println(" ...... Dealer chooses to stand  ......");
     }
 
+    /** Blackjack - game logic for dealer's turn */
     public void blackJackDealersTurn_Human(Player player, Dealer dealer) {
         // dealer's turn
         int playerMaxPoints = 0;
@@ -97,6 +100,7 @@ public class Game {
         }
     }
 
+    /** Blackjack - game logic for player's turn */
     public void blackJackPlayersTurn(Player player, int betAmount) {
         // player's turn
         for (int index = 0; index < player.getHands().size(); index++) {
@@ -140,6 +144,7 @@ public class Game {
         }
     }
 
+    /** Blackjack - compare player's each hand of cards with dealer's cards, and add/subtract balance accordingly*/
     public void blackJackCompare(Player player, Dealer dealer, int currBet) {
         for (int index = 0; index < player.getHands().size(); index++) {
             System.out.println("Player's cards are: " + player.printHand(index) + ", total points "
@@ -182,7 +187,7 @@ public class Game {
         }
     }
 
-    /** play the game based on different modes */
+    /** Blackjack - play the game based on different modes */
     public void PlayMode(int mode) {
         // only two mode supported for now. Could comment this out if we need to support more.
         if (mode == 1) {
@@ -244,7 +249,7 @@ public class Game {
         }
     }
 
-    /** run a recursion to get all possible split pairs */
+    /** Blackjack - run a recursion to get all possible split pairs */
     private Player split(Player player, List<Card> hand, int betPerGame) {
         Card card1 = hand.get(0);
         Card card2 = hand.get(1);
