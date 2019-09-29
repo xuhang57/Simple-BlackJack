@@ -1,6 +1,9 @@
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * @author Fuqing Wang, Hang Xu
+ */
 public class CardDeck {
     private List<Card> deck;
 
@@ -12,19 +15,15 @@ public class CardDeck {
         // In a normal poker game, there are 4 suits
         this.deck.clear();
         int suitSize = Suit.values().length;
+        int rankSize = Card.getRankSize();
         for (int suit = 0; suit < suitSize; suit++) {
-            // ToDo: Rank should be abstracted as well so that it is easily changeable
-            for (int rank = 0; rank < 13; rank++) {
+            // ToDo: Rank should be further abstracted, currently, using a static method in Card class to return the size
+            for (int rank = 0; rank < rankSize; rank++) {
                 this.deck.add(new Card(Suit.values()[suit], rank));
             }
         }
     }
 
-    /*
-     * Shuffling via using a random index and draw a Card from the card deck
-     *
-     * return: a Card drawn from the card deck
-     */
     public Card drawCard() {
         int random = (int) Math.floor(Math.random() * this.deck.size());
         Card card = this.deck.get(random);
@@ -41,11 +40,15 @@ public class CardDeck {
     }
 
 
+    @Override
     public String toString() {
-        String str = "[";
+        StringBuilder sb = new StringBuilder();
+        sb.append('[');
         for (int i = 0; i < deck.size(); i++){
-            str += (deck.get(i).toString() + ',');
+            sb.append(deck.get(i).toString()).append(',');
+
         }
-        return str.substring(0, str.length() - 1) + "]";
+        return sb.substring(0, sb.length() - 1)+ "]";
+
     }
 }

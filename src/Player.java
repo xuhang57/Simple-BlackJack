@@ -1,6 +1,9 @@
 import java.util.ArrayList;
 import java.util.List;
-public class Player extends GameParticipant {
+/**
+ * @author Fuqing Wang, Hang Xu
+ */
+public class Player extends AbstractPlayer {
 
     private List<Integer> winMultiplier;
 
@@ -21,15 +24,15 @@ public class Player extends GameParticipant {
         this.balance -= balance;
     }
 
-    public void setwinMultiplier(List<Integer> list){
+    public void setWinMultiplier(List<Integer> list){
         this.winMultiplier = list;
     }
 
-    public void setwinMultiplierOf(int index, int multi){
+    public void setWinMultiplierOf(int index, int multi){
         this.winMultiplier.set(index, multi);
     }
 
-    public int getwinMultiplierOf(int index){
+    public int getWinMultiplierOf(int index){
         return this.winMultiplier.get(index);
     }
 }

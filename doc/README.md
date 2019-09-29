@@ -13,3 +13,13 @@ A Simple OOD BlackJack written in Java
 8. Choose Application from the template and make sure you use BlackJack as the main class.
 9. Run the code and enjoy the game!
 
+## Guide
+
+Please make sure you only type numbers into the console when asking for inputs.
+Input validation is not a focus on this project therefore we have focused on other features in this game.
+
+## Authors
+
+* Fuqing Wang
+* Hang Xu
+

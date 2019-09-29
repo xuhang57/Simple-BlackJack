@@ -1,17 +1,20 @@
 import java.util.ArrayList;
 import java.util.List;
 
-/*
- * An abstract class of Player that can be used by a HumanPlayer or a Dealer class.
+/**
+ * @author Fuqing Wang, Hang Xu
  */
-public abstract class GameParticipant {
-    String name;
-    List<Card> hand;
-    List<List<Card>> hands;
-    int balance;
-    boolean isDealer;
+public abstract class AbstractPlayer {
+    /** protected so that only accessible within the application */
+    protected int balance;
+    private String name;
+    private List<Card> hand;
+    private List<List<Card>> hands;
+    private boolean isDealer;
+    private static final int TWENTY_ONE = 21;
+    private static final String ACE = "A";
 
-    public GameParticipant(String name, int balance, boolean isDealer) {
+    public AbstractPlayer(String name, int balance, boolean isDealer) {
         this.name = name;
         this.hand = new ArrayList<>();
         this.hands = new ArrayList<>();
@@ -62,17 +65,12 @@ public abstract class GameParticipant {
         this.balance = balance;
     }
 
-    // add a card to current player object
+    /** add a card to current player object */
     public void addCard(Card card) {
         this.hand.add(card);
     };
 
-    /*
-    Compute the total value of a Hand
-
-    param: index : int, used to locate the hand in all hands that the Player might have
-    return: int, total value of a hand
-     */
+    /** Compute the total value of a Hand */
     public int calculateRank(int index) {
         int value = 0;
         // count how many "Ace" in the hand that we have used as a value of 11
@@ -84,13 +82,13 @@ public abstract class GameParticipant {
             // Special case: since "Ace" could have value 11 or 1
             // Here we treat "Ace" as 11 if the total value is less than 21
             // Therefore, we add another 10 (the 1 has been added above) and increase the count counter
-            if (card.getFace().equals("A")) {
+            if (card.getFace().equals(ACE)) {
                 value += 10;
                 count += 1;
             }
             // When the total value is larger than 21 and we have used "Ace" as 11 not 1, we need to treat it as 1
             // Therefore, subtract 10 from the total value and decrease the count counter
-            while (value > 21 && count > 0) {
+            while (value > TWENTY_ONE && count > 0) {
                 value -= 10;
                 count -= 1;
             }
@@ -99,45 +97,41 @@ public abstract class GameParticipant {
     }
 
     public String printHand() {
-        String cards = "[";
+        StringBuilder sb = new StringBuilder();
+        sb.append("[");
         for(Card card: this.hand) {
-            cards += (card.getSuit() + " " + card.getFace() + ", ");
+            sb.append(card.getSuit()).append(" ").append(card.getFace()).append(", ");
         }
-        cards.trim();
-        return cards.substring(0, cards.length() - 2) + "]";
+        sb.trimToSize();
+        return sb.substring(0, sb.length() - 2) + "]";
     }
 
-    /*
-    Print the Hand that the Player possesses
-
-    return: A String contains all Cards in the Hand that the Payer possesses
-     */
+    /** Print the Hand that the Player possesses */
     public String printHand(int index) {
-        String cards = "[";
+        StringBuilder sb = new StringBuilder();
         List<Card> hand = this.hands.get(index);
         for (Card card: hand) {
-            cards += (card.getSuit().toString() + " " + card.getFace() + ", ");
+            sb.append(card.getSuit()).append(" ").append(card.getFace()).append(", ");
         }
-        cards.trim();
-        return cards.substring(0, cards.length() - 2) + "]";
+        sb.trimToSize();
+        return sb.substring(0, sb.length() - 2) + "]";
     }
 
-    /*
-    Print All Hands that the Player might have
-
-    return: A String contains all hands that the Player might have
-     */
+    /** Print All Hands that the Player might have */
     public String printHands() {
-        String res = "[";
+        StringBuilder res = new StringBuilder();
+        res.append("[");
         for (int i = 0; i < this.hands.size(); i++) {
-            String cards = "[";
+            StringBuilder sb = new StringBuilder();
+            sb.append("[");
             List<Card> hand = hands.get(i);
             for (Card card: hand) {
-                cards += (card.getSuit().toString() + " " + card.getFace() + ", ");
+                sb.append(card.getSuit().toString()).append(" ").append(card.getFace()).append(", ");
             }
-            cards.trim();
-            res += cards.substring(0, cards.length() - 2) + "]" + "]";
+            sb.trimToSize();
+
+            res.append(sb.substring(0, sb.length() - 2)).append("]").append("]");
         }
-        return res;
+        return res.toString();
     }
 }

@@ -1,12 +1,18 @@
 /*
- * Authors: Fuqing Wang (fuqing04@bu.edu), Hang Xu (xuh@bu.edu)
+ * Authors: Fuqing Wang (fuqing04 AT bu.edu), Hang Xu (xuh AT bu.edu)
  * Game: Console-based BlackJack with 2 different play modes
  * Date: Sept. 28, 2019
  */
 
 import java.util.Scanner;
 
+/**
+ * @author Fuqing Wang, Hang Xu
+ */
 public class BlackJack {
+    /** player mode, currently, support two different modes */
+    private static final int SINGLE = 1;
+    private static final int DOUBLE = 2;
 
     public static void main(String[] args) {
         System.out.println("Welcome to Fuqing and Hang's BlackJack table!");
@@ -18,17 +24,11 @@ public class BlackJack {
         Scanner scan = new Scanner(System.in);
         System.out.println("Please choose a play mode: (1 for single player, 2 for versus mode)");
         int mode = scan.nextInt();
-        while (mode != 1 && mode != 2) {
+        // For future game we could just comment this out. For now, since only two modes required, we keep the check
+        while (mode != SINGLE && mode != DOUBLE) {
             System.out.println("Please enter either 1 or 2");
             mode = scan.nextInt();
         }
-
-        if (mode == 1) {
-            System.out.println("Single Player Mode");
-            game.PlayMode(1);
-        } else {
-            System.out.println("Double Player Mode");
-            game.PlayMode(2);
-        }
+        game.PlayMode(mode);
     }
 }
