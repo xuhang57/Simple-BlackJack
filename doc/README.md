@@ -3,6 +3,30 @@ A Simple OOD BlackJack written in Java
 
 ## How to Run
 
+Two ways of running this code. First you could run it from the CLI
+
+```shell
+# Navgate to the src/ and compile, run.
+$ javac BlackJack.java
+$ java BlackJack
+```
+
+We have tested under:
+
+```shell
+openjdk 11.0.3 2019-04-16
+OpenJDK Runtime Environment AdoptOpenJDK (build 11.0.3+7)
+OpenJDK 64-Bit Server VM AdoptOpenJDK (build 11.0.3+7, mixed mode)
+
+$ javac --version
+javac 11.0.3
+```
+
+Note: It does not have to be in Java 11. We have developed this game under Java 8 using IntelliJ. The command line
+uses a JDK 11 but it should also work for Java 8.
+
+Alternatively, you could use IntelliJ and make sure setup the project correctly:
+
 1. This game is developed via using IntelliJ and Java SDK 1.8 (openJDK)
 2. Open the source folder using IntelliJ
 3. Click on the file on the menu and select "Project Structure"
